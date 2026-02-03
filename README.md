@@ -113,35 +113,188 @@ Make clean
 <br />
 <br />
 <img src="images/19.png" height="80%" width="80%" alt=""/>
+<img src="images/20.png" height="80%" width="80%" alt=""/>
 <b>(If you also want crypto support:)
 ./configure --with-crypto --enable-magic
 </b>
 <br />
 <br />
-<img src="images/20.png" height="80%" width="80%" alt=""/>
 <b>Rebuild and reinstall:
 make 
 </b>
 <br />
 <br />
 <img src="images/22.png" height="80%" width="80%" alt=""/>
+<img src="images/23.png" height="80%" width="80%" alt=""/>
 <b>
 sudo make install
 </b>
 <br />
 <br />
-<img src="images/23.png" height="80%" width="80%" alt=""/>
+<img src="images/24.png" height="80%" width="80%" alt=""/>
 <b>Verify the Magic module is available:
 yara -M
 </b>
 <br />
 <br />
-<img src="images/24.png" height="80%" width="80%" alt=""/>
+<img src="images/25.png" height="80%" width="80%" alt=""/>
 <b>The Magic module is now enabled.
 Begin the experiment — follow along with the steps below to proceed.
 </b>
 <br />
 <br />
+
+<h2>3. String Based IoC Detection </h2>
+<b>Create a test file:
+echo "this file contains malicious_payload_123" > sample.txt
+</b>
+<br />
+<br />
+<img src="images/26.png" height="80%" width="80%" alt=""/>
+<b>Create a YARA rule:
+nano string_test.yar
+</b>
+<br />
+<br />
+<img src="images/27.png" height="80%" width="80%" alt=""/>
+<b>Paste the following:
+rule String_IOC_Test {   strings:
+    $ioc = "malicious_payload_123"
+  condition:
+    $ioc
+}
+</b>
+<br />
+<br />
+<img src="images/28.png" height="80%" width="80%" alt=""/>
+<b>Run YARA:
+yara string_test.yar sample.txt
+</b>
+<br />
+<br />
+<img src="images/29.png" height="80%" width="80%" alt=""/>
+<b>✅ Confirms: basic IoC matching works.</b>
+<br />
+<br />
+
+<h2>4. Hash based threat intelligence matching </h2>
+<b>Get the file SHA-256:
+sha256sum sample.txt
+</b>
+<br />
+<br />
+<img src="images/30.png" height="80%" width="80%" alt=""/>
+<b>Create the YARA rule:
+nano hash_test.yar
+</b>
+<br />
+<br />
+<img src="images/31.png" height="80%" width="80%" alt=""/>
+<b>Paste and replace HASH with the SHA-256 value:
+import "hash"
+
+rule Hash_Match_Test {
+  condition:
+    hash.sha256(0, filesize) == "HASH"
+}
+</b>
+<br />
+<br />
+<img src="images/32.png" height="80%" width="80%" alt=""/>
+<br />
+<b>Run the scan:
+yara hash_test.yar sample.txt
+</b>
+<br />
+<br />
+<img src="images/33.png" height="80%" width="80%" alt=""/>
+<br />
+<b>✅ Confirms: hash-based detection works. </b>
+<br />
+<br />
+
+<h2>5. Encoded content detection </h2>
+<b>Create a sample base64 file:
+echo "QUJDREVGR0hJSktMTU5PUFFSU1RVVldYWVphYmNkZWZnaGk=" > encoded.txt
+</b>
+<br />
+<br />
+<img src="images/34.png" height="80%" width="80%" alt=""/>
+<b>Create the YARA rule:
+nano base64_test.yar
+</b>
+<br />
+<br />
+<img src="images/35.png" height="80%" width="80%" alt=""/>
+<b>Paste the following:
+rule Base64_Suspicion {
+  meta:
+    description = "Suspicious long base64-looking string"
+
+  strings:
+    $b64 = /[A-Za-z0-9+\/]{40,}={0,2}/
+
+  condition:
+    $b64
+}
+</b>
+<br />
+<br />
+<img src="images/36.png" height="80%" width="80%" alt=""/>
+<br />
+<b>Scan:
+yara -s base64_test.yar encoded.txt
+</b>
+<br />
+<br />
+<img src="images/37.png" height="80%" width="80%" alt=""/>
+<br />
+<b>You should see "Base64_Suspicion encoded.txt" — the test PASSED.
+✅ Confirms: heuristic detection works.
+</b>
+<br />
+<br />
+
+<h2>6. File type detection using magic module </h2>
+<b>Create a test text file:
+echo "This is clearly a text file." > text_sample.txt
+</b>
+<br />
+<br />
+<img src="images/38.png" height="80%" width="80%" alt=""/>
+<b>Create the rule:
+nano magic_test.yar
+</b>
+<br />
+<br />
+<img src="images/39.png" height="80%" width="80%" alt=""/>
+<b>Paste the following and save:
+import "magic"
+
+rule Detect_Text_File {
+  meta:
+    description = "Detect files whose real type is text/* using magic.mime_type"
+
+  condition:
+    magic.mime_type() matches /^text\//
+}
+</b>
+<br />
+<br />
+<img src="images/40.png" height="80%" width="80%" alt=""/>
+<br />
+<b>Run the rule:
+yara magic_test.yar text_sample.txt
+</b>
+<br />
+<br />
+<img src="images/41.png" height="80%" width="80%" alt=""/>
+<br />
+<b>✅ Confirms: The Magic module works.</b>
+<br />
+<br />
+
+
 </p>
 
 <!--

@@ -365,18 +365,37 @@ rule Contains_Malware_Word {
 <br />
 <br />
 <img src="images/50.png" height="80%" width="80%" alt=""/>
+<br />
 <b>Run a recursive scan:
 yara -r dir_scan_rules.yar samples/
 </b>
 <br />
 <br />
 <img src="images/51.png" height="80%" width="80%" alt=""/>
+<br />
 <b>✅ Confirms: bulk/directory scanning works.
 </b>
 <br />
 <br />
 
-
+<h2>Conclusion</h2>
+<b>YARA is functioning correctly. The experiments confirmed:</b>
+<br />
+<br />
+<b>
+•	✅ String rules match
+•	✅ Hash rules match
+•	✅ Heuristic detection works
+•	✅ PE and Magic modules work
+•	✅ Recursive scans work
+</b>
+<br />
+<br />
+<b>
+If all tests succeeded, your setup is ready for threat-intelligence use.
+</b>
+<br />
+<br />
 
 </p>
 

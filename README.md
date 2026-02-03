@@ -294,6 +294,89 @@ yara magic_test.yar text_sample.txt
 <br />
 <br />
 
+<h2>7. Windows malware-style logic </h2>
+<b>Download a known PE (safe — Sysinternals tools are legitimate) and extract it:
+wget https://download.sysinternals.com/files/PsExec.zip
+unzip PsExec.zip
+</b>
+<br />
+<br />
+<img src="images/43.png" height="80%" width="80%" alt=""/>
+<b>Create the YARA rule:
+nano pe_test.yar
+Paste:
+import "pe"
+rule Detect_PE_File {
+  condition:
+    pe.is_pe
+}
+</b>
+<br />
+<br />
+<img src="images/44.png" height="80%" width="80%" alt=""/>
+<b>Run the scan:
+yara pe_test.yar PsExec.exe
+</b>
+<br />
+<br />
+<img src="images/45.png" height="80%" width="80%" alt=""/>
+<b>✅ Confirms: PE module works (important).</b>
+<br />
+<br />
+
+<h2>8. Directory Scanning (real-world usage)</h2>
+<b>Create a lab folder and samples:
+mkdir -p ~/yara_lab/samples
+cd ~/yara_lab/samples
+</b>
+<br />
+<br />
+<img src="images/46.png" height="80%" width="80%" alt=""/>
+<b>Create sample files:
+echo "This is just a normal text file." > note1.txt
+echo "Another benign file with nothing special." > readme.txt
+echo "malware_test_payload_12345" > fake_malware.bin
+</b>
+<br />
+<br />
+<img src="images/47.png" height="80%" width="80%" alt=""/>
+<img src="images/48.png" height="80%" width="80%" alt=""/>
+<b>Create a YARA rule for directory scanning:
+cd ~/yara_lab
+nano dir_scan_rules.yar
+</b>
+<br />
+<br />
+<img src="images/49.png" height="80%" width="80%" alt=""/>
+<b>Paste:
+rule Contains_Malware_Word {
+  meta:
+    description = "Detect files containing the word 'malware'"
+    author = "me"
+    use_case = "directory scan test"
+
+  strings:
+    $mal = "malware"
+
+  condition:
+    $mal
+}
+</b>
+<br />
+<br />
+<img src="images/50.png" height="80%" width="80%" alt=""/>
+<b>Run a recursive scan:
+yara -r dir_scan_rules.yar samples/
+</b>
+<br />
+<br />
+<img src="images/51.png" height="80%" width="80%" alt=""/>
+<b>✅ Confirms: bulk/directory scanning works.
+</b>
+<br />
+<br />
+
+
 
 </p>
 
